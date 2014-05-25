@@ -15,7 +15,7 @@
         "php": ">=5.3.0"
     },
     "require-dev": {
-        "codeception/codeception": "1.8.*@dev"
+        "codeception/codeception": "*"
     },
     "autoload": {
         "psr-0": {

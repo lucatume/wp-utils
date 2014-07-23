@@ -59,3 +59,7 @@ A quasi WordPress specific set of functions meant to make printing JavaScript ob
 
     // or print on the page in WordPress
     tad_JsObject::on($in)->localize();
+
+## Changelog
+* 2.0.0 - "updated" the package to work with PHP <code>5.2</code>
+* 1.1.0 - first public release

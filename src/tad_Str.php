@@ -1,8 +1,6 @@
 <?php
 
-namespace tad\utils;
-
-class Str
+class tad_Str
 {
     public static function underscore($string)
     {

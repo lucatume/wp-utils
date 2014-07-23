@@ -1,11 +1,6 @@
 <?php
 
-namespace tad\utils;
-
-
-use \tad\utils\Str;
-
-class Arr
+class tad_Arr
 {
     public static function isAssoc($array)
     {
@@ -26,7 +21,7 @@ class Arr
         }
         $buffer = array();
         foreach ($arr as $key => $value) {
-            $camelBackKey = Str::camelBack($key);
+            $camelBackKey = tad_Str::camelBack($key);
             $buffer[$camelBackKey] = $value;
         }
         return $buffer;
@@ -50,7 +45,7 @@ class Arr
     /**
      * Remove key/value pairs on a key base from an array.
      *
-     * Usage is Arr::removeKey($arr, 'one', 'two')
+     * Usage is tad_Arr::removeKey($arr, 'one', 'two')
      *
      * @return array The array minus the removed elements
      */
@@ -69,7 +64,7 @@ class Arr
     /**
      * Remove key/value pairs from an array on a value base from an array.
      *
-     * Usage is Arr::removeValue($arr, 'one', 'two')
+     * Usage is tad_Arr::removeValue($arr, 'one', 'two')
      *
      * @return array The array minus the removed elements
      */

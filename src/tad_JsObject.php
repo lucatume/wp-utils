@@ -1,8 +1,5 @@
 <?php
-
-namespace tad\utils;
-
-class JsObject
+class tad_JsObject
 {
     protected $in;
     protected $out;

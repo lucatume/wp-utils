@@ -1,10 +1,8 @@
 <?php
-namespace tad\utils;
-
 /**
  * A utility class dealing with scripts and styles files and paths operations.
  */
-class Script
+class tad_Script
 {
     /**
      * Properly inserts a suffix in a file path taking user inputs or debug variables into account.

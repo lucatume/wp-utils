@@ -18,8 +18,6 @@
         "codeception/codeception": "1.8.*"
     },
     "autoload": {
-        "psr-0": {
-            "tad\\": "src/"
-        }
+        "classmap": ["src/"]
     }
 }

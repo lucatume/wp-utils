@@ -13,7 +13,7 @@ class tad_Str
     public static function camelCase($string)
     {
         $buffer = self::extractComponentsFrom($string);
-        
+
         // print_r($buffer);
         $buffer = implode(' ', $buffer);
         $buffer = ucwords($buffer);
@@ -27,32 +27,33 @@ class tad_Str
     protected static function uniteUsing($glue, $string, $flag = 0)
     {
         $elements = self::extractComponentsFrom($string);
-        array_walk($elements, function (&$str, $key, $flag)
-        {
-            switch ($flag) {
-                case 1:
-                    $str = ucfirst($str);
-                    break;
-
-                case -1:
-                    $str = strtolower($str);
-                    break;
-
-                case 11:
-                    $str = strtoupper($str);
-                    break;
-
-                default:
-                    $str = $str;
-                    break;
-            }
-        }, $flag);
+        array_walk($elements,array(__CLASS__, 'joinWalk') , $flag);
         return implode($glue, $elements);
+    }
+    protected static function joinWalk (&$str, $key, $flag)
+    {
+        switch ($flag) {
+        case 1:
+            $str = ucfirst($str);
+            break;
+
+        case -1:
+            $str = strtolower($str);
+            break;
+
+        case 11:
+            $str = strtoupper($str);
+            break;
+
+        default:
+            $str = $str;
+            break;
+        }
     }
     protected static function extractComponentsFrom($string)
     {
         $elements = explode(' ', preg_replace('/[-_\s\\\\\/]/', ' ', $string));
-        
+
         // split elements further by uppercase and numbers
         $smallerElements = array();
         foreach ($elements as $el) {
@@ -93,24 +94,24 @@ class tad_Str
         if (count($words) > 0) {
             $out.= $ellipsis;
         }
-        
+
         // replace spacer with space
         $out = preg_replace('/&nbsp;/', ' ', $out);
         return $out;
     }
-    
+
     public static function splitLinesByWords($string, $wordsPerLine = 10, $tag = 'span', $class = 'line', $maxChars = null, $ellipsis = '&hellip;')
     {
         if ($maxChars) {
             $string = self::atMostChars($string, $maxChars, $ellipsis);
         }
-        
+
         // split the string by new lines
         $paragraphs = explode('\n', $string);
         $out = array();
         $openTag = sprintf('<%s class="%s">', $tag, $class);
         $closeTag = sprintf('</%s>', $tag);
-        
+
         foreach ($paragraphs as $paragraph) {
             if (strlen($paragraph) == 0) {
                 continue;
@@ -125,12 +126,12 @@ class tad_Str
                 } else {
                     array_push($words, $next);
                     array_push($out, $openTag . implode(' ', $buffer) . $closeTag);
-                    
+
                     // $out.= $openTag . implode(' ', $buffer) . $closeTag;
                     $buffer = array();
                 }
             }
-            
+
             // $out.= $openTag . implode(' ', $buffer) . $closeTag;
             array_push($out, $openTag . implode(' ', $buffer) . $closeTag);
         }
@@ -141,7 +142,7 @@ class tad_Str
         if ($maxChars) {
             $string = self::atMostChars($string, $maxChars, $ellipsis);
         }
-        
+
         // split the string by new lines
         $paragraphs = explode('\n', $string);
         $out = array();
@@ -151,7 +152,7 @@ class tad_Str
             if (strlen($paragraph) == 0) {
                 continue;
             }
-            
+
             // split the paragraph into words
             $words = explode(' ', $paragraph);
             $words = array_reverse($words);
@@ -165,49 +166,49 @@ class tad_Str
                     $buffer.= $next . ' ';
                 } else {
                     array_push($words, $next);
-                    
+
                     // $out.= sprintf('%s%s%s', $openTag, trim($buffer), $closeTag);
                     array_push($out, sprintf('%s%s%s', $openTag, trim($buffer), $closeTag));
                     $buffer = '';
                 }
             }
-            
+
             // add the last buffer
             // $out.= sprintf('%s%s%s', $openTag, trim($buffer), $closeTag);
             array_push($out, sprintf('%s%s%s', $openTag, trim($buffer), $closeTag));
         }
         return $out;
     }
-    
+
     private static function replaceSpacesInsideTagsWith($string, $replaceWith = '&nbsp;')
     {
         $words = implode(' <', explode('<', $string));
         $words = implode('> ', explode('>', $words));
         $words = preg_replace('/\\s+/', ' ', $words);
         $words = explode(' ', $string);
-        
+
         $buffer = array();
         $inTag = false;
         $tagBuffer = array();
         foreach ($words as $word) {
             if (preg_match("/<[^\s]*>/", $word)) {
-                
+
                 // open and closing tag like '<span>' or '</span>'
                 array_push($buffer, $word);
             } else if (preg_match("/<[^\\s]*/", $word)) {
-                
+
                 // opening a tag
                 $inTag = true;
                 array_push($tagBuffer, $word);
             } else if (preg_match("/[^\\s]*>/u", $word)) {
-                
+
                 // // closing a tag
                 $inTag = false;
                 array_push($tagBuffer, $word);
                 array_push($buffer, implode($replaceWith, $tagBuffer));
                 $tagBuffer = array();
             } else {
-                
+
                 // a word...
                 if ($inTag) {
                     array_push($tagBuffer, $word);

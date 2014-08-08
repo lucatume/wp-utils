@@ -124,7 +124,7 @@ class tad_Plugin
      *
      * @return string/boolean       The plugin file/folder relative to the plugins folder path (e.g. "my-plugin/my-plugin.php") or false if the plugin is not installed.
      */
-    public function is_plugin_installed($pluginTitle = null)
+    public function isInstalled($pluginTitle = null)
     {
         $pluginTitle = is_string($pluginTitle) ? $pluginTitle : $this->pluginName;
         // get all the plugins
@@ -141,5 +141,21 @@ class tad_Plugin
         }
 
         return false;
+    }
+
+    /**
+     * Checks if a WordPress plugin is not installed.
+     *
+     * @param  string /null $pluginTitle The plugin title (e.g. "My Plugin"), defautls to plugin name.
+     *
+     * @return boolean/string       The plugin file/folder relative to the plugins folder path (e.g. "my-plugin/my-plugin.php") or true if the plugin is not installed.
+     */
+    public function isNotInstalled($pluginTitle = null)
+    {
+        $installedPlugin = $this->isInstalled($pluginTitle);
+        if ($installedPlugin) {
+            return $installedPlugin;
+        }
+        return true;
     }
 }

@@ -7,7 +7,7 @@ class tad_JsObject
     public function toObject($arr)
     {
         if (!is_array($arr)) {
-            throw new \InvalidArgumentException("Argument must be an array", 1);
+            throw new InvalidArgumentException("Argument must be an array", 1);
             
         }
         $out = json_encode($arr);

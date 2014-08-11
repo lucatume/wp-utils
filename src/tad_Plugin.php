@@ -14,6 +14,7 @@ class tad_Plugin
      * @var string The path to the plugin file relative to the plugins folder, e.g. "my-plugin/my-plugin.php".
      */
     protected $pluginFile;
+    protected $requiredPlugins = array();
     /**
      * @var tad_FunctionsAdapter|tad_FunctionsAdapterInterface an instance of the global functions adapter.
      */
@@ -157,5 +158,39 @@ class tad_Plugin
             return $installedPlugin;
         }
         return true;
+    }
+
+    public function addRequiredPlugin($pluginTitle, $pluginSlug, $pluginUrl, $pluginFile)
+    {
+        $this->requiredPlugins[$pluginTitle] = array('url' => $pluginUrl, 'file' => $pluginFile, 'slug' => $pluginSlug);
+    }
+
+    public function checkDependencies()
+    {
+        $link = false;
+        foreach ($this->requiredPlugins as $title => $info) {
+            $plugin = new tad_Plugin($title, $info['slug'], $info['file']);
+            if ($this->isNotInstalled($title)) {
+                $link = $plugin->getInstallationLink();
+            } else if (!$this->wpf->is_active_plugin($info['file'])) {
+                $link = $plugin->getActivationLink();
+            }
+        }
+        if ($link) {
+            $message = $this->generateWpDieMessage($info['url'], $title, $link);
+            $title = sprintf("Missing %s prerequisites!", $this->pluginName);
+            wp_die($message, $title);
+        }
+        return true;
+    }
+
+    protected function generateWpDieMessage($requiredPluginUrl, $requiredPluginTitle, $requiredPluginInstallationOrActivationLink)
+    {
+        $requiredPluginUrl = "http://wordpress.org/plugins/wp-router/";
+        $notice = sprintf('<span style="display:block;text-align:center;">%s requires <a href="%s" target="_blank">%s</a> to be installed and activated.</span>', $this->pluginName, $requiredPluginUrl, $requiredPluginTitle);
+        $pluginsUrl = admin_url('plugins.php');
+        $backToPluginsLink = sprintf('<a href="%s">&#8592; Back to plugins.</a>', $pluginsUrl);
+        $dieMessage = sprintf("%s<br><br>%s%s", $notice, $backToPluginsLink, $$requiredPluginInstallationOrActivationLink);
+        return $dieMessage;
     }
 }

@@ -171,7 +171,7 @@ class tad_Plugin
      * @param $pluginUrl The required plugin information url.
      * @param $pluginFile The required plugin main file when installed in WordPress relative to the plugins folder, e.g. "hello-dolly.php" or "my-plugin/plugin.php".
      */
-    public function addRequiredPlugin($pluginTitle, $pluginSlug, $pluginUrl, $pluginFile)
+    public function requires($pluginTitle, $pluginSlug, $pluginUrl, $pluginFile)
     {
         $this->requiredPlugins[$pluginTitle] = array('url' => $pluginUrl, 'file' => $pluginFile, 'slug' => $pluginSlug);
     }
@@ -181,7 +181,7 @@ class tad_Plugin
      *
      * @return bool Will return true if all dependencies are satisfied.
      */
-    public function checkDependencies()
+    public function checkRequirements()
     {
         $link = false;
         foreach ($this->requiredPlugins as $title => $info) {

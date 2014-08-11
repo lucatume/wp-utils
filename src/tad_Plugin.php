@@ -14,6 +14,9 @@ class tad_Plugin
      * @var string The path to the plugin file relative to the plugins folder, e.g. "my-plugin/my-plugin.php".
      */
     protected $pluginFile;
+    /**
+     * @var array An array of required plugins in the format [title -> [url, file, slug]]
+     */
     protected $requiredPlugins = array();
     /**
      * @var tad_FunctionsAdapter|tad_FunctionsAdapterInterface an instance of the global functions adapter.
@@ -160,11 +163,24 @@ class tad_Plugin
         return true;
     }
 
+    /**
+     * Adds a plugin to the plugin required plugins list.
+     *
+     * @param $pluginTitle The required plugin title, e.g. "Hello Dolly".
+     * @param $pluginSlug The required plugin slug, e.g. "hello-dolly".
+     * @param $pluginUrl The required plugin information url.
+     * @param $pluginFile The required plugin main file when installed in WordPress relative to the plugins folder, e.g. "hello-dolly.php" or "my-plugin/plugin.php".
+     */
     public function addRequiredPlugin($pluginTitle, $pluginSlug, $pluginUrl, $pluginFile)
     {
         $this->requiredPlugins[$pluginTitle] = array('url' => $pluginUrl, 'file' => $pluginFile, 'slug' => $pluginSlug);
     }
 
+    /**
+     * Checks for the plugin required plugins and outputs an helpful die message if one is not activated or not installed.
+     *
+     * @return bool Will return true if all dependencies are satisfied.
+     */
     public function checkDependencies()
     {
         $link = false;
@@ -177,14 +193,25 @@ class tad_Plugin
             }
         }
         if ($link) {
-            $message = $this->generateWpDieMessage($info['url'], $title, $link);
+            $message = $this->generateWpDieDependencyMessage($info['url'], $title, $link);
             $title = sprintf("Missing %s prerequisites!", $this->pluginName);
             wp_die($message, $title);
         }
         return true;
     }
 
-    protected function generateWpDieMessage($requiredPluginUrl, $requiredPluginTitle, $requiredPluginInstallationOrActivationLink)
+    /**
+     * Generates the message to be displayed in a wp_die generated screen.
+     *
+     * This is meant to be used to generate a missing plugin dependency wp_die message.
+     *
+     * @param $requiredPluginUrl The url to the plugin information page.
+     * @param $requiredPluginTitle The title of the required plugin, e.g. "Hello Dolly".
+     * @param $requiredPluginInstallationOrActivationLink The plugin installation or activation link. See getInstallationLink and getActivationLink methods.
+     *
+     * @return string The die message markup.
+     */
+    protected function generateWpDieDependencyMessage($requiredPluginUrl, $requiredPluginTitle, $requiredPluginInstallationOrActivationLink)
     {
         $requiredPluginUrl = "http://wordpress.org/plugins/wp-router/";
         $notice = sprintf('<span style="display:block;text-align:center;">%s requires <a href="%s" target="_blank">%s</a> to be installed and activated.</span>', $this->pluginName, $requiredPluginUrl, $requiredPluginTitle);

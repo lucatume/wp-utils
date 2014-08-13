@@ -52,7 +52,7 @@ class tad_Plugin
      *
      * @return string             The plugin installation url
      */
-    public function getInstallationLink()
+    protected function generateInstallationLink()
     {
         $installUrl = $this->wpf->admin_url('update.php?action=install-plugin&plugin=' . $this->pluginSlug);
         $installUrl = $this->wpf->wp_nonce_url($installUrl, 'install-plugin_' . $this->pluginSlug);
@@ -69,19 +69,32 @@ class tad_Plugin
      *
      * @return mixed
      */
-    public function theInstallationLink(array $classes = null, $id = null, $title = null)
+    public function getInstallationLink(array $classes = null, $id = null, $title = null)
     {
-        $link = $this->getInstallationLink();
+        $link = $this->generateInstallationLink();
         $title = is_string($title) ? $title : sprintf('install %s', $this->pluginName);
         return $this->getActionLink($classes, $id, $title, $link);
     }
 
     /**
+     * Echoes the anchor tag for the plugin installation link.
+     *
+     * @param array $classes An array of classes to assign to the anchor, defaults to none.
+     * @param null $id The id to assign to the anchor, defaults to none.
+     * @param string $title The link title, defaults to 'install plugin-name'.
+     *
+     * @return void
+     */
+    public function theInstallationLink(array $classes = null, $id = null, $title = null)
+    {
+        echo $this->getInstallationLink($classes, $id, $title);
+    }
+    /**
      * Generate an activation URL for a plugin like the ones found in WordPress plugin administration screen.
      *
      * @return string         The plugin activation url
      */
-    public function getActivationLink()
+    protected function generateActivationLink()
     {
         // the plugin might be located in the plugin folder directly
 
@@ -107,13 +120,26 @@ class tad_Plugin
      *
      * @return mixed
      */
-    public function theActivationLink(array $classes = null, $id = null, $title = null)
+    public function getActivationLink(array $classes = null, $id = null, $title = null)
     {
-        $link = $this->getActivationLink();
+        $link = $this->generateActivationLink();
         $title = is_string($title) ? $title : sprintf('activate %s', $this->pluginName);
         return $this->getActionLink($classes, $id, $title, $link);
     }
 
+    /**
+     * Echoes the anchor tag for the plugin activation link.
+     *
+     * @param array $classes An array of classes to assign to the anchor, defaults to none.
+     * @param null $id The id to assign to the anchor, defaults to none.
+     * @param string $title The link title, defaults to 'activate plugin-name'.
+     *
+     * @return void
+     */
+    public function theActivationLink(array $classes = null, $id = null, $title = null)
+    {
+        echo $this->getActivationLink($classes, $id, $title);
+    }
     protected function getActionLink(array $classes, $id, $title, $link)
     {
         $class = is_array($classes) ? sprintf('class="%s"', implode(' ', $classes)) : '';
@@ -187,9 +213,9 @@ class tad_Plugin
         foreach ($this->requiredPlugins as $title => $info) {
             $plugin = new tad_Plugin($title, $info['slug'], $info['file']);
             if ($this->isNotInstalled($title)) {
-                $link = $plugin->getInstallationLink();
+                $link = $plugin->getInstallationLink(null, $info['slug'] . '-installation-link');
             } else if (!$this->wpf->is_active_plugin($info['file'])) {
-                $link = $plugin->getActivationLink();
+                $link = $plugin->getActivationLink(null, $info['slug'] . '-activation-link');
             }
         }
         if ($link) {
@@ -205,9 +231,10 @@ class tad_Plugin
      *
      * This is meant to be used to generate a missing plugin dependency wp_die message.
      *
-     * @param $requiredPluginUrl The url to the plugin information page.
-     * @param $requiredPluginTitle The title of the required plugin, e.g. "Hello Dolly".
-     * @param $requiredPluginInstallationOrActivationLink The plugin installation or activation link. See getInstallationLink and getActivationLink methods.
+     * @param string $requiredPluginUrl The url to the plugin information page.
+     * @param string $requiredPluginTitle The title of the required plugin, e.g. "Hello Dolly".
+     * @param string $requiredPluginInstallationOrActivationLink The plugin installation or activation link. See generateInstallationLink and generateActivationLink methods.
+     * @param bool $installing If true the required plugin needs to be installed, if false it needs to be activated; defaults to true.
      *
      * @return string The die message markup.
      */
@@ -217,7 +244,7 @@ class tad_Plugin
         $notice = sprintf('<span style="display:block;text-align:center;">%s requires <a href="%s" target="_blank">%s</a> to be installed and activated.</span>', $this->pluginName, $requiredPluginUrl, $requiredPluginTitle);
         $pluginsUrl = admin_url('plugins.php');
         $backToPluginsLink = sprintf('<a href="%s">&#8592; Back to plugins.</a>', $pluginsUrl);
-        $dieMessage = sprintf("%s<br><br>%s%s", $notice, $backToPluginsLink, $$requiredPluginInstallationOrActivationLink);
+        $dieMessage = sprintf("%s<br><br>%s%s", $notice, $backToPluginsLink, $requiredPluginInstallationOrActivationLink);
         return $dieMessage;
     }
 }

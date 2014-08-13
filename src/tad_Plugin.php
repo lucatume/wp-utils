@@ -1,6 +1,6 @@
 <?php
 
-class tad_Plugin
+        class tad_Plugin
 {
     /**
      * @var string The plugin name, e.g. "Hello Dolly".
@@ -140,7 +140,7 @@ class tad_Plugin
     {
         echo $this->getActivationLink($classes, $id, $title);
     }
-    protected function getActionLink(array $classes, $id, $title, $link)
+    protected function getActionLink(array $classes = null, $id = null, $title, $link)
     {
         $class = is_array($classes) ? sprintf('class="%s"', implode(' ', $classes)) : '';
         $id = is_string($id) ? sprintf('id="%s"', $id) : '';

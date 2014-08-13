@@ -44,6 +44,9 @@
         if (!preg_match("/[\\w-]*\\/*[\\w-]+\\.php/", $pluginFile)) {
             throw new BadArgumentException('Plugin file must be in the "plugin-folder/plugin-file.php" format.', 4);
         }
+        $this->pluginName = $pluginName;
+        $this->pluginSlug = $pluginSlug;
+        $this->pluginFile = $pluginFile;
         $this->wpf = $functions ? $functions : new tad_FunctionsAdapter();
     }
 
@@ -72,7 +75,7 @@
     public function getInstallationLink(array $classes = null, $id = null, $title = null)
     {
         $link = $this->generateInstallationLink();
-        $title = is_string($title) ? $title : sprintf('install %s', $this->pluginName);
+        $title = is_string($title) ? $title : sprintf('Yes, install %s now &#8594;', $this->pluginName);
         return $this->getActionLink($classes, $id, $title, $link);
     }
 
@@ -123,7 +126,7 @@
     public function getActivationLink(array $classes = null, $id = null, $title = null)
     {
         $link = $this->generateActivationLink();
-        $title = is_string($title) ? $title : sprintf('activate %s', $this->pluginName);
+        $title = is_string($title) ? $title : sprintf('Yes, activate %s now &#8594;', $this->pluginName);
         return $this->getActionLink($classes, $id, $title, $link);
     }
 
@@ -144,7 +147,7 @@
     {
         $class = is_array($classes) ? sprintf('class="%s"', implode(' ', $classes)) : '';
         $id = is_string($id) ? sprintf('id="%s"', $id) : '';
-        return sprintf('<a href="%s" class="%s" id="%s">%s</a>', $link, $class, $id, $title);
+        return sprintf('<a href="%s" %s %s style="float:right;">%s</a>', $link, $class, $id, $title);
     }
 
     /**
@@ -211,15 +214,19 @@
     {
         $link = false;
         foreach ($this->requiredPlugins as $title => $info) {
+            // by default ask for installation
+            $installing = true;
             $plugin = new tad_Plugin($title, $info['slug'], $info['file']);
             if ($this->isNotInstalled($title)) {
                 $link = $plugin->getInstallationLink(null, $info['slug'] . '-installation-link');
             } else if (!$this->wpf->is_active_plugin($info['file'])) {
                 $link = $plugin->getActivationLink(null, $info['slug'] . '-activation-link');
+                // the plugin needs to be activated, not installed
+                $installing = false;
             }
         }
         if ($link) {
-            $message = $this->generateWpDieDependencyMessage($info['url'], $title, $link);
+            $message = $this->generateWpDieDependencyMessage($info['url'], $title, $link, $installing);
             $title = sprintf("Missing %s prerequisites!", $this->pluginName);
             wp_die($message, $title);
         }
@@ -238,12 +245,14 @@
      *
      * @return string The die message markup.
      */
-    protected function generateWpDieDependencyMessage($requiredPluginUrl, $requiredPluginTitle, $requiredPluginInstallationOrActivationLink)
+    protected function generateWpDieDependencyMessage($requiredPluginUrl, $requiredPluginTitle, $requiredPluginInstallationOrActivationLink, $installing = true)
     {
         $requiredPluginUrl = "http://wordpress.org/plugins/wp-router/";
-        $notice = sprintf('<span style="display:block;text-align:center;">%s requires <a href="%s" target="_blank">%s</a> to be installed and activated.</span>', $this->pluginName, $requiredPluginUrl, $requiredPluginTitle);
+        $installedAndOrActivated = $installing ? 'installed and activated' : 'activated';
+        $installOrActivate = $installing ? 'install' : 'activate';
+        $notice = sprintf('<span style="display:block;text-align:center;">%s requires <a href="%s" target="_blank">%s</a> to be %s. Do you want to %s it now?</span>', $this->pluginName, $requiredPluginUrl, $requiredPluginTitle, $installedAndOrActivated, $installOrActivate);
         $pluginsUrl = admin_url('plugins.php');
-        $backToPluginsLink = sprintf('<a href="%s">&#8592; Back to plugins.</a>', $pluginsUrl);
+        $backToPluginsLink = sprintf('<a href="%s">&#8592; No, get me back to the plugins page</a>', $pluginsUrl);
         $dieMessage = sprintf("%s<br><br>%s%s", $notice, $backToPluginsLink, $requiredPluginInstallationOrActivationLink);
         return $dieMessage;
     }

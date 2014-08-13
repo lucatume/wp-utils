@@ -219,7 +219,7 @@
             $plugin = new tad_Plugin($title, $info['slug'], $info['file']);
             if ($this->isNotInstalled($title)) {
                 $link = $plugin->getInstallationLink(null, $info['slug'] . '-installation-link');
-            } else if (!$this->wpf->is_active_plugin($info['file'])) {
+            } else if (!$this->wpf->is_plugin_active($info['file'])) {
                 $link = $plugin->getActivationLink(null, $info['slug'] . '-activation-link');
                 // the plugin needs to be activated, not installed
                 $installing = false;

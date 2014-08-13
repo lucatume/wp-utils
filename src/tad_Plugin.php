@@ -187,7 +187,7 @@
     {
         $installedPlugin = $this->isInstalled($pluginTitle);
         if ($installedPlugin) {
-            return $installedPlugin;
+            return false;
         }
         return true;
     }

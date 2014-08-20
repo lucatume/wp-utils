@@ -220,3 +220,11 @@ class tad_Str
         return implode(' ', $buffer);
     }
 }
+
+// Add function lcfirst missing from PHP 5.2
+if(function_exists('lcfirst') === false) {
+    function lcfirst($str) {
+        $str[0] = strtolower($str[0]);
+        return $str;
+    }
+}

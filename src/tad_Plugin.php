@@ -1,6 +1,6 @@
 <?php
 
-        class tad_Plugin
+class tad_Plugin extends tad_Object
 {
     /**
      * @var string The plugin name, e.g. "Hello Dolly".
@@ -18,10 +18,6 @@
      * @var array An array of required plugins in the format [title -> [url, file, slug]]
      */
     protected $requiredPlugins = array();
-    /**
-     * @var tad_FunctionsAdapter|tad_FunctionsAdapterInterface an instance of the global functions adapter.
-     */
-    protected $wpf;
 
     /**
      * @param $pluginName The plugin name, e.g. "Hello Dolly".
@@ -47,7 +43,7 @@
         $this->pluginName = $pluginName;
         $this->pluginSlug = $pluginSlug;
         $this->pluginFile = $pluginFile;
-        $this->wpf = $functions ? $functions : new tad_FunctionsAdapter();
+        $this->f = $this->setFunctionsAdapter($functions);
     }
 
     /**

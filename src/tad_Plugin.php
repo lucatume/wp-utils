@@ -1,24 +1,27 @@
 <?php
-
 class tad_Plugin extends tad_Object
 {
+    
     /**
      * @var string The plugin name, e.g. "Hello Dolly".
      */
     protected $pluginName;
+    
     /**
      * @var string The plugin slug, e.g. "hello-dolly".
      */
     protected $pluginSlug;
+    
     /**
      * @var string The path to the plugin file relative to the plugins folder, e.g. "my-plugin/my-plugin.php".
      */
     protected $pluginFile;
+    
     /**
      * @var array An array of required plugins in the format [title -> [url, file, slug]]
      */
     protected $requiredPlugins = array();
-
+    
     /**
      * @param $pluginName The plugin name, e.g. "Hello Dolly".
      * @param $pluginSlug The plugin slug, e.g. "hello-dolly".
@@ -43,9 +46,9 @@ class tad_Plugin extends tad_Object
         $this->pluginName = $pluginName;
         $this->pluginSlug = $pluginSlug;
         $this->pluginFile = $pluginFile;
-        $this->f = $this->setFunctionsAdapter($functions);
+        $this->setFunctionsAdapter($functions);
     }
-
+    
     /**
      * Generate an installation URL for a plugin like the ones found on the Add New Plugin search results screen.
      *
@@ -53,12 +56,12 @@ class tad_Plugin extends tad_Object
      */
     protected function generateInstallationLink()
     {
-        $installUrl = $this->wpf->admin_url('update.php?action=install-plugin&plugin=' . $this->pluginSlug);
-        $installUrl = $this->wpf->wp_nonce_url($installUrl, 'install-plugin_' . $this->pluginSlug);
-
+        $installUrl = $this->f->admin_url('update.php?action=install-plugin&plugin=' . $this->pluginSlug);
+        $installUrl = $this->f->wp_nonce_url($installUrl, 'install-plugin_' . $this->pluginSlug);
+        
         return $installUrl;
     }
-
+    
     /**
      * Return the anchor tag for the plugin installation link.
      *
@@ -74,7 +77,7 @@ class tad_Plugin extends tad_Object
         $title = is_string($title) ? $title : sprintf('Yes, install %s now &#8594;', $this->pluginName);
         return $this->getActionLink($classes, $id, $title, $link);
     }
-
+    
     /**
      * Echoes the anchor tag for the plugin installation link.
      *
@@ -88,6 +91,7 @@ class tad_Plugin extends tad_Object
     {
         echo $this->getInstallationLink($classes, $id, $title);
     }
+    
     /**
      * Generate an activation URL for a plugin like the ones found in WordPress plugin administration screen.
      *
@@ -95,21 +99,22 @@ class tad_Plugin extends tad_Object
      */
     protected function generateActivationLink()
     {
+        
         // the plugin might be located in the plugin folder directly
-
+        
         if (strpos($this->pluginFile, '/')) {
             $pluginFile = str_replace('/', '%2F', $this->pluginFile);
         }
-
-        $activateUrl = sprintf(admin_url('plugins.php?action=activate&plugin=%s&plugin_status=all&paged=1&s'), $pluginFile);
-
+        
+        $activateUrl = sprintf(admin_url('plugins.php?action=activate&plugin=%s&plugin_status=all&paged=1&s') , $pluginFile);
+        
         // change the plugin request to the plugin to pass the nonce check
         $_REQUEST['plugin'] = $pluginFile;
         $activateUrl = wp_nonce_url($activateUrl, 'activate-plugin_' . $pluginFile);
-
+        
         return $activateUrl;
     }
-
+    
     /**
      * Return the anchor tag for the plugin activation link.
      *
@@ -125,7 +130,7 @@ class tad_Plugin extends tad_Object
         $title = is_string($title) ? $title : sprintf('Yes, activate %s now &#8594;', $this->pluginName);
         return $this->getActionLink($classes, $id, $title, $link);
     }
-
+    
     /**
      * Echoes the anchor tag for the plugin activation link.
      *
@@ -145,7 +150,7 @@ class tad_Plugin extends tad_Object
         $id = is_string($id) ? sprintf('id="%s"', $id) : '';
         return sprintf('<a href="%s" %s %s style="float:right;">%s</a>', $link, $class, $id, $title);
     }
-
+    
     /**
      * Checks if a WordPress plugin is installed.
      *
@@ -156,22 +161,23 @@ class tad_Plugin extends tad_Object
     public function isInstalled($pluginTitle = null)
     {
         $pluginTitle = is_string($pluginTitle) ? $pluginTitle : $this->pluginName;
+        
         // get all the plugins
-        $installedPlugins = $this->wpf->get_plugins();
-
+        $installedPlugins = $this->f->get_plugins();
+        
         foreach ($installedPlugins as $installedPlugin => $data) {
-
+            
             // check for the plugin title
             if ($data['Title'] == $pluginTitle) {
-
+                
                 // return the plugin folder/file
                 return $installedPlugin;
             }
         }
-
+        
         return false;
     }
-
+    
     /**
      * Checks if a WordPress plugin is not installed.
      *
@@ -187,7 +193,7 @@ class tad_Plugin extends tad_Object
         }
         return true;
     }
-
+    
     /**
      * Adds a plugin to the plugin required plugins list.
      *
@@ -198,9 +204,13 @@ class tad_Plugin extends tad_Object
      */
     public function requires($pluginTitle, $pluginSlug, $pluginUrl, $pluginFile)
     {
-        $this->requiredPlugins[$pluginTitle] = array('url' => $pluginUrl, 'file' => $pluginFile, 'slug' => $pluginSlug);
+        $this->requiredPlugins[$pluginTitle] = array(
+            'url' => $pluginUrl,
+            'file' => $pluginFile,
+            'slug' => $pluginSlug
+        );
     }
-
+    
     /**
      * Checks for the plugin required plugins and outputs an helpful die message if one is not activated or not installed.
      *
@@ -210,13 +220,15 @@ class tad_Plugin extends tad_Object
     {
         $link = false;
         foreach ($this->requiredPlugins as $title => $info) {
+            
             // by default ask for installation
             $installing = true;
             $plugin = new tad_Plugin($title, $info['slug'], $info['file']);
             if ($this->isNotInstalled($title)) {
                 $link = $plugin->getInstallationLink(null, $info['slug'] . '-installation-link');
-            } else if (!$this->wpf->is_plugin_active($info['file'])) {
+            } else if (!$this->f->is_plugin_active($info['file'])) {
                 $link = $plugin->getActivationLink(null, $info['slug'] . '-activation-link');
+                
                 // the plugin needs to be activated, not installed
                 $installing = false;
             }
@@ -228,7 +240,7 @@ class tad_Plugin extends tad_Object
         }
         return true;
     }
-
+    
     /**
      * Generates the message to be displayed in a wp_die generated screen.
      *
